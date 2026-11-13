@@ -339,20 +339,19 @@
                 gridTerritory[index] = currentPlayerIndex;
                 hasMovedThisTurn = true;
                 
-                // 動態效果
-                targetNumberEl.classList.add('scale-125', 'text-emerald-500');
+                // 黑白棋包圍檢查
+                checkEnclosure(index, currentPlayerIndex);
+                
+                updateUI();
+                
+                // 成功提示效果 (不改變目標數字)
+                targetNumberEl.classList.add('scale-110', 'text-emerald-500');
                 setTimeout(() => {
-                    targetNumberEl.classList.remove('scale-125', 'text-emerald-500');
-                    currentTarget = num; 
-                    
-                    // 黑白棋包圍檢查
-                    checkEnclosure(index, currentPlayerIndex);
-                    
-                    updateUI();
-                    
-                    clockBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span>拍鐘（換下一位）</span>';
-                    clockBtn.className = 'w-full bg-amber-400 hover:bg-amber-300 text-amber-900 border-2 border-b-4 border-amber-500 font-extrabold py-4 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-lg active:border-b-0 active:translate-y-1 animate-bounce';
+                    targetNumberEl.classList.remove('scale-110', 'text-emerald-500');
                 }, 300);
+                
+                clockBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span>拍鐘（換下一位）</span>';
+                clockBtn.className = 'w-full bg-amber-400 hover:bg-amber-300 text-amber-900 border-2 border-b-4 border-amber-500 font-extrabold py-4 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-lg active:border-b-0 active:translate-y-1 animate-bounce';
             } else {
                 // 不合法，利用視覺震動提示 (省略複雜動畫，用顏色閃爍代替)
                 const btn = document.getElementById(`cell-${num}`);
@@ -456,6 +455,19 @@
             do {
                 currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
             } while (players[currentPlayerIndex].chances <= 0 && checkActivePlayers() > 1);
+
+            // 換陣營時，隨機抽取一個全新的目標數字 (從尚未被佔領的格子中挑選)
+            let emptyCells = [];
+            gridTerritory.forEach((owner, idx) => {
+                if (owner === null) emptyCells.push(idx + 1);
+            });
+            if (emptyCells.length > 0) {
+                currentTarget = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                targetNumberEl.textContent = currentTarget;
+                // 加入換數字的跳動提示
+                targetNumberEl.classList.add('scale-125', 'text-indigo-600');
+                setTimeout(() => targetNumberEl.classList.remove('scale-125', 'text-indigo-600'), 300);
+            }
 
             startTimerInterval();
             updateUI();
