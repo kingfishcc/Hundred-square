@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>百數表陣營爭奪戰</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入源泉圓體與其他字型 -->
+    <link href="https://cdn.jsdelivr.net/npm/gensen-rounded-web@1.0.1/css/gensen-rounded-tw.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chiron+GoRound+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 定義主字型變數，將源泉圓體設為首選字型 */
+            --main-font: 'GenSenRounded TW', 'Chiron GoRound TC', 'Microsoft JhengHei', sans-serif;
+        }
+
+        body { 
+            font-family: var(--main-font); 
+            font-optical-sizing: auto;
+            background-color: #1e3a8a; /* 海軍深藍背景 */
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .blueprint-panel {
+            background-color: #ffffff;
+            background-image:
+                linear-gradient(rgba(30, 58, 138, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(30, 58, 138, 0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex items-center justify-center">
+    <div class="max-w-6xl w-full mx-auto flex flex-col lg:flex-row gap-6">
+        
+        <!-- 左欄：計時器與百數表 (約佔 70%) -->
+        <div class="lg:w-8/12 flex flex-col gap-4">
+            
+            <!-- 標題與計時器區域 -->
+            <div class="blueprint-panel rounded-2xl shadow-lg border-2 border-slate-200 p-5 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <!-- 船錨圖示 -->
+                    <div class="w-12 h-12 flex items-center justify-center bg-slate-100 rounded-full border-2 border-slate-300 shadow-sm text-slate-700">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" style="display:none;"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 4v10m0 0a8 8 0 100-16 8 8 0 000 16zm-5-3.5a5.5 5.5 0 0010 0"></path><circle cx="12" cy="6" r="2" stroke-width="2"></circle></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-slate-800 tracking-wide uppercase">百數表陣營爭奪戰</h1>
+                        <p class="text-sm text-slate-500 font-bold mt-1 tracking-widest">因數與倍數挑戰賽</p>
+                    </div>
+                </div>
+                
+                <!-- 新增：計時器與控制按鈕 -->
+                <div class="flex items-center gap-4">
+                    <div class="text-center min-w-[80px]">
+                        <div class="text-xs text-slate-400 font-bold uppercase tracking-wider mb-1">Time</div>
+                        <div id="timer-display" class="text-3xl font-black text-red-500 tabular-nums">30</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="pause-btn" onclick="togglePause()" class="w-11 h-11 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl border border-slate-200 transition shadow-sm" title="暫停／繼續">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>
+                        </button>
+                        <button onclick="requestRestart()" class="w-11 h-11 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl border border-slate-200 transition shadow-sm" title="重新開始">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 百數表網格 -->
+            <div class="blueprint-panel p-6 rounded-2xl shadow-lg border-2 border-slate-200">
+                <div id="number-grid" class="grid grid-cols-10 gap-1.5 sm:gap-2">
+                    <!-- 數字方塊由 JS 動態生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 右欄：遊戲規則與玩家狀態 (約佔 30%) -->
+        <div class="lg:w-4/12 flex flex-col gap-4">
+            
+            <!-- 當前目標卡牌區 -->
+            <div class="blueprint-panel rounded-2xl shadow-lg border-2 border-slate-200 p-5 text-center">
+                <h2 class="text-sm font-bold text-slate-500 mb-2">當前目標數字</h2>
+                <div id="target-number" class="text-6xl font-black text-indigo-600 mb-2 transition-transform">
+                    49
+                </div>
+                <p class="text-xs text-slate-400 font-medium">請找出它的正因數或正倍數</p>
+                <button id="skip-btn" onclick="handleSkip()" class="mt-4 w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2 px-2 rounded-xl border border-slate-200 transition hidden shadow-sm text-sm">
+                    <svg class="w-4 h-4 inline-block align-text-bottom mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg> 跳過（當前陣營扣一格＋下面陣營換題）
+                </button>
+            </div>
+
+            <!-- 玩家狀態區 -->
+            <div class="blueprint-panel rounded-2xl shadow-lg border-2 border-slate-200 p-5 flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-extrabold text-slate-700 flex items-center gap-2">
+                        陣營佔領狀態
+                    </h2>
+                    <!-- 模式切換開關 -->
+                    <div class="flex bg-slate-100 rounded-lg p-0.5 border border-slate-200">
+                        <button id="mode-2p" onclick="setGameMode(2)" class="px-2 py-1 text-xs font-bold rounded-md transition-colors text-slate-500 hover:text-slate-700">2人</button>
+                        <button id="mode-3p" onclick="setGameMode(3)" class="px-2 py-1 text-xs font-bold rounded-md transition-colors bg-white shadow-sm text-slate-800">3人</button>
+                    </div>
+                </div>
+                
+                <div id="players-container" class="space-y-3">
+                    <!-- 玩家狀態由 JS 生成 -->
+                </div>
+
+                <!-- 操作按鈕 -->
+                <div class="mt-6 pt-4 border-t border-slate-200 space-y-3">
+                    <button id="clock-btn" onclick="handleClockHit()" class="w-full bg-white hover:bg-slate-50 text-slate-800 font-extrabold py-4 px-4 rounded-xl border-2 border-b-4 border-slate-300 transition-all shadow-md flex items-center justify-center gap-2 text-lg active:border-b-0 active:translate-y-1">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> <span>開始遊戲</span>
+                    </button>
+                    <p class="text-xs text-slate-400 text-center font-bold">選好數字後，必須按拍鐘換下一位。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 結算畫面 (隱藏) -->
+    <div id="endgame-modal" class="fixed inset-0 bg-slate-900 bg-opacity-75 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl transform transition-all">
+            <h2 class="text-3xl font-black text-slate-800 mb-4">遊戲結束</h2>
+            <div id="winner-announcement" class="text-xl font-bold text-slate-700 mb-6"></div>
+            <button onclick="restartGame(true)" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 w-full">
+                再玩一局！
+            </button>
+        </div>
+    </div>
+
+    <!-- 重新開始確認畫面 (隱藏) -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900 bg-opacity-75 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl transform transition-all">
+            <h2 class="text-2xl font-black text-slate-800 mb-4">重新開始</h2>
+            <p class="text-slate-600 mb-6 font-semibold">確定要放棄目前進度，重新開始新的一局嗎？</p>
+            <div class="flex gap-4">
+                <button onclick="closeConfirmModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 px-4 rounded-xl transition">
+                    繼續遊戲
+                </button>
+                <button onclick="restartGame(true)" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-4 rounded-xl transition shadow-md">
+                    確定重來
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 邏輯 -->
+    <script>
+        // 遊戲狀態變數
+        let currentTarget = Math.floor(Math.random() * 100) + 1;
+        let currentPlayerIndex = 0;
+        let numPlayers = 3; // 預設 3 人模式
+        
+        let players = [
+            { name: '綠隊', color: 'bg-emerald-400', border: 'border-emerald-500', text: 'text-emerald-800', score: 0, chances: 3 },
+            { name: '紫隊', color: 'bg-purple-400', border: 'border-purple-500', text: 'text-purple-800', score: 0, chances: 3 },
+            { name: '藍隊', color: 'bg-blue-400', border: 'border-blue-500', text: 'text-blue-800', score: 0, chances: 3 }
+        ];
+
+        let gridTerritory = Array(100).fill(null); // 記錄 0-99 索引 (對應數字 1-100) 的佔領者 index
+        
+        let timeLeft = 30; 
+        let timerInterval = null;
+        let isGameStarted = false;
+        let isPaused = false;
+        let hasMovedThisTurn = false;
+
+        // 綁定 DOM 元素
+        const gridContainer = document.getElementById('number-grid');
+        const targetNumberEl = document.getElementById('target-number');
+        const playersContainer = document.getElementById('players-container');
+        const clockBtn = document.getElementById('clock-btn');
+        const timerDisplay = document.getElementById('timer-display');
+
+        // --- 遊戲模式切換 ---
+        function setGameMode(mode) {
+            if (isGameStarted) {
+                alert("遊戲已經開始，請先「重新開始」再切換人數！");
+                return;
+            }
+            numPlayers = mode;
+            
+            // 更新按鈕外觀
+            document.getElementById('mode-2p').className = mode === 2 ? 'px-2 py-1 text-xs font-bold rounded-md transition-colors bg-white shadow-sm text-slate-800' : 'px-2 py-1 text-xs font-bold rounded-md transition-colors text-slate-500 hover:text-slate-700';
+            document.getElementById('mode-3p').className = mode === 3 ? 'px-2 py-1 text-xs font-bold rounded-md transition-colors bg-white shadow-sm text-slate-800' : 'px-2 py-1 text-xs font-bold rounded-md transition-colors text-slate-500 hover:text-slate-700';
+            
+            updateUI();
+        }
+
+        // --- 初始化與重置 ---
+        function initGrid() {
+            gridContainer.innerHTML = '';
+            for (let i = 1; i <= 100; i++) {
+                const btn = document.createElement('button');
+                btn.id = `cell-${i}`;
+                btn.textContent = i;
+                btn.className = `aspect-square text-sm sm:text-base font-bold rounded-lg transition-all flex items-center justify-center border-2 border-slate-200 bg-white hover:bg-slate-100 text-slate-700`;
+                btn.onclick = () => handleCellClick(i);
+                gridContainer.appendChild(btn);
+            }
+        }
+
+        function restartGame(force = false) {
+            clearInterval(timerInterval);
+            isGameStarted = false;
+            isPaused = false;
+            hasMovedThisTurn = false;
+            timeLeft = 30;
+            currentPlayerIndex = 0;
+            currentTarget = Math.floor(Math.random() * 100) + 1; 
+            gridTerritory = Array(100).fill(null);
+            
+            players.forEach(p => {
+                p.score = 0;
+                p.chances = 3;
+            });
+
+            document.getElementById('endgame-modal').classList.add('hidden');
+            document.getElementById('confirm-modal').classList.add('hidden');
+            document.getElementById('skip-btn').classList.add('hidden');
+
+            const pauseBtn = document.getElementById('pause-btn');
+            pauseBtn.innerHTML = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>';
+            pauseBtn.className = 'w-11 h-11 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl border border-slate-200 transition shadow-sm';
+            
+            timerDisplay.classList.remove('text-amber-500', 'text-red-600', 'animate-bounce', 'text-xl');
+            timerDisplay.classList.add('text-red-500', 'text-3xl');
+            timerDisplay.textContent = '30';
+
+            clockBtn.innerHTML = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg> <span>開始遊戲</span>';
+            clockBtn.className = 'w-full bg-white hover:bg-slate-50 text-slate-800 font-extrabold py-4 px-4 rounded-xl border-2 border-b-4 border-slate-300 transition-all shadow-md flex items-center justify-center gap-2 text-lg active:border-b-0 active:translate-y-1';
+
+            initGrid();
+            updateUI();
+        }
+
+        // --- UI 更新 ---
+        function updateUI() {
+            targetNumberEl.textContent = currentTarget;
+
+            // 更新玩家列表
+            playersContainer.innerHTML = '';
+            players.slice(0, numPlayers).forEach((p, index) => {
+                const isCurrent = (index === currentPlayerIndex) && isGameStarted && !isPaused;
+                const isEliminated = p.chances <= 0;
+                
+                // 計算分數
+                p.score = gridTerritory.filter(cell => cell === index).length;
+
+                // 產生生命值愛心
+                let hearts = '';
+                const fullHeart = '<svg class="w-4 h-4 inline text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>';
+                const emptyHeart = '<svg class="w-4 h-4 inline text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>';
+                
+                for(let i=0; i<3; i++) {
+                    hearts += (i < p.chances) ? `<span class="mx-0.5">${fullHeart}</span>` : `<span class="mx-0.5">${emptyHeart}</span>`;
+                }
+
+                const playerDiv = document.createElement('div');
+                // 移除 scale-105 與大面積換色，改用精緻的邊框與陰影標示當前陣營，改為琥珀黃色系 (amber)
+                playerDiv.className = `p-3 rounded-xl border-2 transition-all flex flex-col ${isCurrent ? 'border-amber-400 shadow-sm ring-2 ring-amber-50 bg-white' : 'border-slate-100 bg-white'} ${isEliminated ? 'opacity-50 grayscale' : ''}`;
+                
+                playerDiv.innerHTML = `
+                    <div class="flex justify-between items-center mb-1">
+                        <div class="flex items-center gap-2">
+                            ${isCurrent ? '<svg class="w-3 h-3 text-amber-500 animate-pulse" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>' : '<div class="w-3 h-3"></div>'}
+                            <div class="w-4 h-4 rounded-full ${p.color} border ${p.border}"></div>
+                            <input type="text" value="${p.name}" onchange="updatePlayerName(${index}, this.value)" class="font-bold text-slate-700 bg-transparent border-none outline-none w-20 text-sm" ${isEliminated ? 'disabled' : ''}>
+                        </div>
+                        <div class="font-black text-lg ${p.text}">${p.score} <span class="text-xs text-slate-400 font-normal">格</span></div>
+                    </div>
+                    <div class="text-xs text-slate-500 flex justify-between items-center pl-5">
+                        <span>${hearts}</span>
+                        ${isEliminated ? '<span class="text-red-500 font-bold">淘汰</span>' : (isCurrent ? '<span class="text-amber-600 font-bold">目前回合</span>' : '')}
+                    </div>
+                `;
+                playersContainer.appendChild(playerDiv);
+            });
+
+            // 更新百數表顏色
+            for (let i = 1; i <= 100; i++) {
+                const btn = document.getElementById(`cell-${i}`);
+                const ownerIndex = gridTerritory[i - 1];
+                
+                btn.className = `aspect-square text-sm sm:text-base font-bold rounded-lg transition-all flex items-center justify-center border-2`;
+                
+                if (ownerIndex !== null) {
+                    // 已被佔領
+                    const p = players[ownerIndex];
+                    btn.className += ` ${p.color} ${p.border} ${p.text} shadow-inner transform scale-95`;
+                } else {
+                    // 空地
+                    btn.className += ` border-slate-200 bg-white hover:bg-slate-100 text-slate-700`;
+                }
+            }
+
+            // 更新計時器外觀
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            if (isPaused) return; // 暫停時由 togglePause 處理顯示
+            
+            timerDisplay.textContent = timeLeft;
+            if (timeLeft <= 5) {
+                timerDisplay.classList.add('text-red-600', 'animate-bounce');
+                timerDisplay.classList.remove('text-red-500');
+            } else {
+                timerDisplay.classList.remove('text-red-600', 'animate-bounce');
+                timerDisplay.classList.add('text-red-500');
+            }
+        }
+
+        function updatePlayerName(index, newName) {
+            players[index].name = newName;
+        }
+
+        // --- 遊戲邏輯 ---
+        function handleCellClick(num) {
+            if (!isGameStarted || isPaused || players[currentPlayerIndex].chances <= 0) return;
+            if (hasMovedThisTurn) {
+                alert("你已經選過數字了！請按「拍鐘」換下一位！");
+                return;
+            }
+
+            const index = num - 1;
+            if (gridTerritory[index] !== null) {
+                alert("這格已經被佔領了！");
+                return;
+            }
+
+            // 檢查因數或倍數
+            if (currentTarget % num === 0 || num % currentTarget === 0) {
+                // 合法移動
+                gridTerritory[index] = currentPlayerIndex;
+                hasMovedThisTurn = true;
+                
+                // 動態效果
+                targetNumberEl.classList.add('scale-125', 'text-emerald-500');
+                setTimeout(() => {
+                    targetNumberEl.classList.remove('scale-125', 'text-emerald-500');
+                    currentTarget = num; 
+                    
+                    // 黑白棋包圍檢查
+                    checkEnclosure(index, currentPlayerIndex);
+                    
+                    updateUI();
+                    
+                    clockBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span>拍鐘（換下一位）</span>';
+                    clockBtn.className = 'w-full bg-amber-400 hover:bg-amber-300 text-amber-900 border-2 border-b-4 border-amber-500 font-extrabold py-4 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-lg active:border-b-0 active:translate-y-1 animate-bounce';
+                }, 300);
+            } else {
+                // 不合法，利用視覺震動提示 (省略複雜動畫，用顏色閃爍代替)
+                const btn = document.getElementById(`cell-${num}`);
+                btn.classList.add('bg-red-200');
+                setTimeout(() => btn.classList.remove('bg-red-200'), 200);
+            }
+        }
+
+        function checkEnclosure(centerIndex, pIndex) {
+            // 8 個方向 (相對位移值，適用於 10x10 網格)
+            const directions = [
+                { dr: -1, dc: -1 }, { dr: -1, dc: 0 }, { dr: -1, dc: 1 },
+                { dr: 0,  dc: -1 },                    { dr: 0,  dc: 1 },
+                { dr: 1,  dc: -1 }, { dr: 1,  dc: 0 }, { dr: 1,  dc: 1 }
+            ];
+
+            const centerRow = Math.floor(centerIndex / 10);
+            const centerCol = centerIndex % 10;
+            let cellsToFlip = [];
+
+            directions.forEach(dir => {
+                let r = centerRow + dir.dr;
+                let c = centerCol + dir.dc;
+                let potentialFlips = [];
+                let foundOwnColor = false;
+
+                while (r >= 0 && r < 10 && c >= 0 && c < 10) {
+                    let idx = r * 10 + c;
+                    let cellOwner = gridTerritory[idx];
+
+                    if (cellOwner === null) {
+                        break; // 遇到空地中斷
+                    } else if (cellOwner !== pIndex) {
+                        potentialFlips.push(idx); // 敵人的棋子，記錄下來
+                    } else {
+                        foundOwnColor = true; // 遇到自己的棋子，形成包圍
+                        break;
+                    }
+                    r += dir.dr;
+                    c += dir.dc;
+                }
+
+                if (foundOwnColor && potentialFlips.length > 0) {
+                    cellsToFlip = cellsToFlip.concat(potentialFlips);
+                }
+            });
+
+            // 執行翻轉
+            cellsToFlip.forEach(idx => {
+                gridTerritory[idx] = pIndex;
+            });
+        }
+
+        function handleClockHit() {
+            if (isPaused) return;
+
+            if (!isGameStarted) {
+                // 首次開始，加入隨機跳動動畫效果
+                isGameStarted = true;
+                clockBtn.disabled = true; // 暫時禁用按鈕，防止連點
+                
+                let jumps = 0;
+                const jumpInterval = setInterval(() => {
+                    targetNumberEl.textContent = Math.floor(Math.random() * 100) + 1;
+                    jumps++;
+                    
+                    if (jumps > 15) {
+                        clearInterval(jumpInterval);
+                        
+                        // 結算真正的開局數字
+                        currentTarget = Math.floor(Math.random() * 100) + 1;
+                        targetNumberEl.textContent = currentTarget;
+                        targetNumberEl.classList.add('scale-125', 'text-indigo-600');
+                        setTimeout(() => targetNumberEl.classList.remove('scale-125', 'text-indigo-600'), 300);
+                        
+                        // 正式啟動計時與遊戲
+                        timeLeft = 30;
+                        startTimerInterval();
+                        updateUI();
+                        
+                        clockBtn.disabled = false;
+                        clockBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span>拍鐘（換下一位）</span>';
+                        clockBtn.className = 'w-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-b-4 border-slate-300 font-extrabold py-4 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-lg active:border-b-0 active:translate-y-1';
+                        
+                        document.getElementById('skip-btn').classList.remove('hidden');
+                    }
+                }, 50); // 每 50 毫秒跳動一次數字
+                
+                return;
+            }
+
+            if (!hasMovedThisTurn) {
+                alert("請先選擇數字！若真找不到，請點選上方「跳過」按鈕。");
+                return;
+            }
+
+            // 換下一位存活的玩家
+            hasMovedThisTurn = false;
+            timeLeft = 30;
+            
+            do {
+                currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
+            } while (players[currentPlayerIndex].chances <= 0 && checkActivePlayers() > 1);
+
+            startTimerInterval();
+            updateUI();
+            checkEndGame();
+            
+            clockBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span>拍鐘（換下一位）</span>';
+            clockBtn.className = 'w-full bg-white hover:bg-slate-50 text-slate-800 border-2 border-b-4 border-slate-300 font-extrabold py-4 px-4 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-lg active:border-b-0 active:translate-y-1';
+        }
+
+        function handleSkip() {
+            if (!isGameStarted || isPaused) return;
+            if (hasMovedThisTurn) {
+                alert("你已經選好數字了，請直接按「拍鐘」換下一位！");
+                return;
+            }
+
+            punishPlayer(currentPlayerIndex);
+            
+            // 換下一位存活的玩家
+            hasMovedThisTurn = false;
+            timeLeft = 30;
+            
+            do {
+                currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
+            } while (players[currentPlayerIndex].chances <= 0 && checkActivePlayers() > 1);
+
+            startTimerInterval();
+            updateUI();
+            checkEndGame();
+        }
+
+        function punishPlayer(pIndex) {
+            // 隨機拔掉一塊領地
+            let myTerritories = [];
+            gridTerritory.forEach((owner, idx) => {
+                if (owner === pIndex) myTerritories.push(idx);
+            });
+            if (myTerritories.length > 0) {
+                let randomCell = myTerritories[Math.floor(Math.random() * myTerritories.length)];
+                gridTerritory[randomCell] = null;
+            }
+            // 隨機換新題目
+            let emptyCells = [];
+            gridTerritory.forEach((owner, idx) => {
+                if (owner === null) emptyCells.push(idx + 1);
+            });
+            if (emptyCells.length > 0) {
+                currentTarget = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                targetNumberEl.classList.add('scale-125', 'text-red-500');
+                setTimeout(() => targetNumberEl.classList.remove('scale-125', 'text-red-500'), 300);
+            }
+        }
+
+        function checkActivePlayers() {
+            return players.slice(0, numPlayers).filter(p => p.chances > 0).length;
+        }
+
+        function startTimerInterval() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft <= 0) {
+                    // 超時扣命
+                    players[currentPlayerIndex].chances--;
+                    if (players[currentPlayerIndex].chances <= 0) {
+                        // 命沒了，扣光
+                        players[currentPlayerIndex].chances = 0;
+                        updateUI();
+                        checkEndGame(true); // 強制檢查是否只剩一人
+                        if(checkActivePlayers() > 1) {
+                            // 若還有其他人，自動換下一位
+                            hasMovedThisTurn = false;
+                            do {
+                                currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
+                            } while (players[currentPlayerIndex].chances <= 0);
+                            timeLeft = 30;
+                            startTimerInterval();
+                            updateUI();
+                        }
+                    } else {
+                        // 扣命後重置 30 秒
+                        timeLeft = 30;
+                        updateUI();
+                    }
+                }
+            }, 1000);
+        }
+
+        // --- 暫停與重新開始邏輯 ---
+        function togglePause() {
+            if (!isGameStarted) return;
+            isPaused = !isPaused;
+            const pauseBtn = document.getElementById('pause-btn');
+            
+            if (isPaused) {
+                clearInterval(timerInterval);
+                pauseBtn.innerHTML = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>';
+                pauseBtn.classList.add('bg-amber-100', 'border-amber-300', 'text-amber-700', 'animate-pulse');
+                pauseBtn.classList.remove('bg-slate-100', 'border-slate-200', 'text-slate-600');
+                
+                timerDisplay.innerHTML = '<span class="text-xl">暫停</span>';
+                timerDisplay.classList.remove('text-red-500', 'text-red-600', 'animate-bounce', 'text-3xl');
+                timerDisplay.classList.add('text-amber-500');
+            } else {
+                startTimerInterval();
+                pauseBtn.innerHTML = '<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M6 5h4v14H6zm8 0h4v14h-4z"/></svg>';
+                pauseBtn.classList.remove('bg-amber-100', 'border-amber-300', 'text-amber-700', 'animate-pulse');
+                pauseBtn.classList.add('bg-slate-100', 'border-slate-200', 'text-slate-600');
+                
+                timerDisplay.innerHTML = '';
+                timerDisplay.classList.remove('text-amber-500', 'text-xl');
+                timerDisplay.classList.add('text-3xl');
+                updateTimerDisplay();
+            }
+            updateUI();
+        }
+
+        function requestRestart() {
+            if (!isGameStarted) {
+                restartGame(true);
+            } else {
+                if (!isPaused) togglePause();
+                document.getElementById('confirm-modal').classList.remove('hidden');
+            }
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+        }
+
+        // --- 結算 ---
+        function checkEndGame(forceCheck = false) {
+            let emptyCount = gridTerritory.filter(cell => cell === null).length;
+            let activeCount = checkActivePlayers();
+
+            if (emptyCount === 0 || activeCount <= 1) {
+                clearInterval(timerInterval);
+                isGameStarted = false;
+                
+                // 找出最高分
+                let winner = null;
+                let maxScore = -1;
+                
+                // 計算最新分數
+                players.slice(0, numPlayers).forEach((p, index) => {
+                    p.score = gridTerritory.filter(cell => cell === index).length;
+                    if (p.chances > 0 && p.score > maxScore) {
+                        maxScore = p.score;
+                        winner = p;
+                    }
+                });
+
+                const endgameModal = document.getElementById('endgame-modal');
+                const winnerText = document.getElementById('winner-announcement');
+                
+                if (winner) {
+                    winnerText.innerHTML = `最大贏家是 <span class="${winner.text} text-2xl">${winner.name}</span><br>獲得了 ${maxScore} 格地盤！`;
+                } else {
+                    winnerText.innerHTML = `全部淘汰，平局！`;
+                }
+                
+                endgameModal.classList.remove('hidden');
+            }
+        }
+
+        // 啟動初始化
+        initGrid();
+        updateUI();
+    </script>
+</body>
+</html>
