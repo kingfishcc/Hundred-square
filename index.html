@@ -44,11 +44,19 @@
             <div class="blueprint-panel rounded-2xl shadow-lg border-2 border-slate-200 p-5 flex flex-wrap items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
                     <!-- 船錨圖示 -->
-                    <div class="w-12 h-12 flex items-center justify-center bg-slate-100 rounded-full border-2 border-slate-300 shadow-sm text-slate-700">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" style="display:none;"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 4v10m0 0a8 8 0 100-16 8 8 0 000 16zm-5-3.5a5.5 5.5 0 0010 0"></path><circle cx="12" cy="6" r="2" stroke-width="2"></circle></svg>
+                    <div class="w-12 h-12 flex items-center justify-center bg-white rounded-full border border-slate-200 shadow-sm text-blue-900">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v4m0 4v10m0 0a8 8 0 100-16 8 8 0 000 16zm-5-3.5a5.5 5.5 0 0010 0"></path>
+                            <circle cx="12" cy="6" r="2" stroke-width="2"></circle>
+                        </svg>
                     </div>
                     <div>
-                        <h1 class="text-2xl font-extrabold text-slate-800 tracking-wide uppercase">百數表陣營爭奪戰</h1>
+                        <div class="flex items-center gap-3">
+                            <h1 class="text-2xl font-extrabold text-blue-900 tracking-wide uppercase">百數表陣營爭奪戰</h1>
+                            <button onclick="openRulesModal()" class="text-sm bg-blue-900 hover:bg-blue-800 text-white px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1 shadow-md border-b-2 border-blue-950" title="遊戲規則">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Zm1 15h-2v-6h2Zm0-8h-2V7h2Z"/></svg> 遊戲規則
+                            </button>
+                        </div>
                         <p class="text-sm text-slate-500 font-bold mt-1 tracking-widest">因數與倍數挑戰賽</p>
                     </div>
                 </div>
@@ -84,7 +92,7 @@
             <!-- 當前目標卡牌區 -->
             <div class="blueprint-panel rounded-2xl shadow-lg border-2 border-slate-200 p-5 text-center">
                 <h2 class="text-sm font-bold text-slate-500 mb-2">當前目標數字</h2>
-                <div id="target-number" class="text-6xl font-black text-indigo-600 mb-2 transition-transform">
+                <div id="target-number" class="text-6xl font-black text-blue-900 mb-2 transition-transform">
                     49
                 </div>
                 <p class="text-xs text-slate-400 font-medium">請找出它的正因數或正倍數</p>
@@ -100,9 +108,9 @@
                         陣營佔領狀態
                     </h2>
                     <!-- 模式切換開關 -->
-                    <div class="flex bg-slate-100 rounded-lg p-0.5 border border-slate-200">
-                        <button id="mode-2p" onclick="setGameMode(2)" class="px-2 py-1 text-xs font-bold rounded-md transition-colors text-slate-500 hover:text-slate-700">2人</button>
-                        <button id="mode-3p" onclick="setGameMode(3)" class="px-2 py-1 text-xs font-bold rounded-md transition-colors bg-white shadow-sm text-slate-800">3人</button>
+                    <div class="flex bg-slate-100 rounded-xl p-1 shadow-inner border border-slate-200">
+                        <button id="mode-2p" onclick="setGameMode(2)" class="px-4 py-1.5 text-sm font-bold rounded-lg transition-colors text-slate-500 hover:text-slate-700">2人</button>
+                        <button id="mode-3p" onclick="setGameMode(3)" class="px-4 py-1.5 text-sm font-bold rounded-lg transition-colors bg-white shadow-sm text-blue-900">3人</button>
                     </div>
                 </div>
                 
@@ -148,6 +156,50 @@
         </div>
     </div>
 
+    <!-- 遊戲規則畫面 (隱藏) -->
+    <div id="rules-modal" class="fixed inset-0 bg-slate-900 bg-opacity-75 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full mx-auto shadow-2xl transform transition-all max-h-[90vh] overflow-y-auto relative">
+            <button onclick="closeRulesModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h2 class="text-2xl font-black text-slate-800 mb-4 border-b-2 border-slate-100 pb-2 flex items-center gap-2">
+                <svg class="w-6 h-6 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                遊戲規則
+            </h2>
+            <div class="space-y-4 text-slate-700 text-sm leading-relaxed font-medium">
+                <div class="flex items-start gap-2.5">
+                    <span class="shrink-0 inline-flex items-center justify-center bg-blue-100 text-blue-900 px-2 py-0.5 rounded text-xs font-bold mt-0.5">１</span>
+                    <p class="text-justify"><strong>設定陣營：</strong> 可以點擊右側的隊伍名稱，幫自己的陣營取個響亮的名字！</p>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="shrink-0 inline-flex items-center justify-center bg-blue-100 text-blue-900 px-2 py-0.5 rounded text-xs font-bold mt-0.5">２</span>
+                    <p class="text-justify"><strong>佔領地盤：</strong> 輪到你時，請在百數表上找出「當前目標數字」的<strong>正因數</strong>或<strong>正倍數</strong>，點擊後即可佔領該格。</p>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="shrink-0 inline-flex items-center justify-center bg-blue-100 text-blue-900 px-2 py-0.5 rounded text-xs font-bold mt-0.5">３</span>
+                    <p class="text-justify"><strong>拍鐘換人：</strong> 選好數字後，<strong>必須</strong>按下右下方的「拍鐘」按鈕換下一位玩家，此時目標數字也會重新隨機抽取。</p>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="shrink-0 inline-flex items-center justify-center bg-blue-100 text-blue-900 px-2 py-0.5 rounded text-xs font-bold mt-0.5">４</span>
+                    <p class="text-justify"><strong>時間壓力：</strong> 每回合只有 30 秒，時間內未拍鐘會扣除１顆愛心（共３次機會，扣完即淘汰）！</p>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="shrink-0 inline-flex items-center justify-center bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-xs font-bold mt-0.5">★</span>
+                    <p class="text-justify"><strong>包圍翻轉（超重要）：</strong> 如果你新佔領的格子，剛好與你原有的格子將敵人的地盤「夾擊（包圍在同一直線或斜線上）」，中間的所有敵方格子都會瞬間變成你的陣營！邊界的４個角落是無法被包圍的無敵據點喔！</p>
+                </div>
+                <div class="flex items-start gap-2.5">
+                    <span class="shrink-0 inline-flex items-center justify-center bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-xs font-bold mt-0.5">注意</span>
+                    <p class="text-justify"><strong>跳過懲罰：</strong> 真的找不到因倍數時，可以點擊目標數字下方的「跳過」，但系統會隨機沒收你１格已佔領的地盤喔！</p>
+                </div>
+            </div>
+            <div class="mt-8">
+                <button onclick="closeRulesModal()" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold py-3 px-4 rounded-xl transition shadow-md">
+                    我了解了，回到遊戲
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript 邏輯 -->
     <script>
         // 遊戲狀態變數
@@ -185,8 +237,8 @@
             numPlayers = mode;
             
             // 更新按鈕外觀
-            document.getElementById('mode-2p').className = mode === 2 ? 'px-2 py-1 text-xs font-bold rounded-md transition-colors bg-white shadow-sm text-slate-800' : 'px-2 py-1 text-xs font-bold rounded-md transition-colors text-slate-500 hover:text-slate-700';
-            document.getElementById('mode-3p').className = mode === 3 ? 'px-2 py-1 text-xs font-bold rounded-md transition-colors bg-white shadow-sm text-slate-800' : 'px-2 py-1 text-xs font-bold rounded-md transition-colors text-slate-500 hover:text-slate-700';
+            document.getElementById('mode-2p').className = mode === 2 ? 'px-4 py-1.5 text-sm font-bold rounded-lg transition-colors bg-white shadow-sm text-blue-900' : 'px-4 py-1.5 text-sm font-bold rounded-lg transition-colors text-slate-500 hover:text-slate-700';
+            document.getElementById('mode-3p').className = mode === 3 ? 'px-4 py-1.5 text-sm font-bold rounded-lg transition-colors bg-white shadow-sm text-blue-900' : 'px-4 py-1.5 text-sm font-bold rounded-lg transition-colors text-slate-500 hover:text-slate-700';
             
             updateUI();
         }
@@ -424,8 +476,8 @@
                         // 結算真正的開局數字
                         currentTarget = Math.floor(Math.random() * 100) + 1;
                         targetNumberEl.textContent = currentTarget;
-                        targetNumberEl.classList.add('scale-125', 'text-indigo-600');
-                        setTimeout(() => targetNumberEl.classList.remove('scale-125', 'text-indigo-600'), 300);
+                        targetNumberEl.classList.add('scale-125', 'text-blue-900');
+                        setTimeout(() => targetNumberEl.classList.remove('scale-125', 'text-blue-900'), 300);
                         
                         // 正式啟動計時與遊戲
                         timeLeft = 30;
@@ -465,8 +517,8 @@
                 currentTarget = emptyCells[Math.floor(Math.random() * emptyCells.length)];
                 targetNumberEl.textContent = currentTarget;
                 // 加入換數字的跳動提示
-                targetNumberEl.classList.add('scale-125', 'text-indigo-600');
-                setTimeout(() => targetNumberEl.classList.remove('scale-125', 'text-indigo-600'), 300);
+                targetNumberEl.classList.add('scale-125', 'text-blue-900');
+                setTimeout(() => targetNumberEl.classList.remove('scale-125', 'text-blue-900'), 300);
             }
 
             startTimerInterval();
@@ -598,6 +650,18 @@
 
         function closeConfirmModal() {
             document.getElementById('confirm-modal').classList.add('hidden');
+        }
+
+        // --- 遊戲規則畫面邏輯 ---
+        function openRulesModal() {
+            if (isGameStarted && !isPaused) {
+                togglePause(); // 打開規則時自動暫停
+            }
+            document.getElementById('rules-modal').classList.remove('hidden');
+        }
+
+        function closeRulesModal() {
+            document.getElementById('rules-modal').classList.add('hidden');
         }
 
         // --- 結算 ---
