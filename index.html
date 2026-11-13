@@ -93,7 +93,7 @@
             <div class="blueprint-panel rounded-2xl shadow-lg border-2 border-slate-200 p-5 text-center">
                 <h2 class="text-sm font-bold text-slate-500 mb-2">當前目標數字</h2>
                 <div id="target-number" class="text-6xl font-black text-blue-900 mb-2 transition-transform">
-                    49
+                    ？
                 </div>
                 <p class="text-xs text-slate-400 font-medium">請找出它的正因數或正倍數</p>
                 <button id="skip-btn" onclick="handleSkip()" class="mt-4 w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-2 px-2 rounded-xl border border-slate-200 transition hidden shadow-sm text-sm">
@@ -203,14 +203,14 @@
     <!-- JavaScript 邏輯 -->
     <script>
         // 遊戲狀態變數
-        let currentTarget = Math.floor(Math.random() * 100) + 1;
+        let currentTarget = '？';
         let currentPlayerIndex = 0;
         let numPlayers = 3; // 預設 3 人模式
         
         let players = [
-            { name: '綠隊', color: 'bg-emerald-400', border: 'border-emerald-500', text: 'text-emerald-800', score: 0, chances: 3 },
-            { name: '紫隊', color: 'bg-purple-400', border: 'border-purple-500', text: 'text-purple-800', score: 0, chances: 3 },
-            { name: '藍隊', color: 'bg-blue-400', border: 'border-blue-500', text: 'text-blue-800', score: 0, chances: 3 }
+            { name: '綠隊', color: 'bg-emerald-400', border: 'border-emerald-500', text: 'text-emerald-800', scoreText: 'text-emerald-500', score: 0, chances: 3 },
+            { name: '紫隊', color: 'bg-purple-400', border: 'border-purple-500', text: 'text-purple-800', scoreText: 'text-purple-500', score: 0, chances: 3 },
+            { name: '藍隊', color: 'bg-blue-400', border: 'border-blue-500', text: 'text-blue-800', scoreText: 'text-blue-500', score: 0, chances: 3 }
         ];
 
         let gridTerritory = Array(100).fill(null); // 記錄 0-99 索引 (對應數字 1-100) 的佔領者 index
@@ -263,7 +263,7 @@
             hasMovedThisTurn = false;
             timeLeft = 30;
             currentPlayerIndex = 0;
-            currentTarget = Math.floor(Math.random() * 100) + 1; 
+            currentTarget = '？'; 
             gridTerritory = Array(100).fill(null);
             
             players.forEach(p => {
@@ -323,7 +323,7 @@
                             <div class="w-4 h-4 rounded-full ${p.color} border ${p.border}"></div>
                             <input type="text" value="${p.name}" onchange="updatePlayerName(${index}, this.value)" class="font-bold text-slate-700 bg-transparent border-none outline-none w-20 text-sm" ${isEliminated ? 'disabled' : ''}>
                         </div>
-                        <div class="font-black text-lg ${p.text}">${p.score} <span class="text-xs text-slate-400 font-normal">格</span></div>
+                        <div class="font-black text-lg ${p.scoreText}">${p.score} <span class="text-xs text-slate-400 font-normal">格</span></div>
                     </div>
                     <div class="text-xs text-slate-500 flex justify-between items-center pl-5">
                         <span>${hearts}</span>
@@ -396,10 +396,12 @@
                 
                 updateUI();
                 
-                // 成功提示效果 (不改變目標數字)
-                targetNumberEl.classList.add('scale-110', 'text-emerald-500');
+                // 成功提示效果 (閃爍當前陣營的顏色，並保持深藍色為基底)
+                targetNumberEl.classList.remove('text-blue-900');
+                targetNumberEl.classList.add('scale-110', players[currentPlayerIndex].scoreText);
                 setTimeout(() => {
-                    targetNumberEl.classList.remove('scale-110', 'text-emerald-500');
+                    targetNumberEl.classList.remove('scale-110', players[currentPlayerIndex].scoreText);
+                    targetNumberEl.classList.add('text-blue-900');
                 }, 300);
                 
                 clockBtn.innerHTML = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> <span>拍鐘（換下一位）</span>';
@@ -476,8 +478,8 @@
                         // 結算真正的開局數字
                         currentTarget = Math.floor(Math.random() * 100) + 1;
                         targetNumberEl.textContent = currentTarget;
-                        targetNumberEl.classList.add('scale-125', 'text-blue-900');
-                        setTimeout(() => targetNumberEl.classList.remove('scale-125', 'text-blue-900'), 300);
+                        targetNumberEl.classList.add('scale-125');
+                        setTimeout(() => targetNumberEl.classList.remove('scale-125'), 300);
                         
                         // 正式啟動計時與遊戲
                         timeLeft = 30;
@@ -516,9 +518,15 @@
             if (emptyCells.length > 0) {
                 currentTarget = emptyCells[Math.floor(Math.random() * emptyCells.length)];
                 targetNumberEl.textContent = currentTarget;
-                // 加入換數字的跳動提示
-                targetNumberEl.classList.add('scale-125', 'text-blue-900');
-                setTimeout(() => targetNumberEl.classList.remove('scale-125', 'text-blue-900'), 300);
+                
+                // 加入換數字的跳動提示，並閃爍下一位陣營的專屬顏色
+                const nextColor = players[currentPlayerIndex].scoreText;
+                targetNumberEl.classList.remove('text-blue-900');
+                targetNumberEl.classList.add('scale-125', nextColor);
+                setTimeout(() => {
+                    targetNumberEl.classList.remove('scale-125', nextColor);
+                    targetNumberEl.classList.add('text-blue-900');
+                }, 300);
             }
 
             startTimerInterval();
@@ -546,6 +554,15 @@
                 currentPlayerIndex = (currentPlayerIndex + 1) % numPlayers;
             } while (players[currentPlayerIndex].chances <= 0 && checkActivePlayers() > 1);
 
+            // 跳過並換人後，閃爍下一位陣營的專屬顏色
+            const nextColor = players[currentPlayerIndex].scoreText;
+            targetNumberEl.classList.remove('text-blue-900');
+            targetNumberEl.classList.add('scale-125', nextColor);
+            setTimeout(() => {
+                targetNumberEl.classList.remove('scale-125', nextColor);
+                targetNumberEl.classList.add('text-blue-900');
+            }, 300);
+
             startTimerInterval();
             updateUI();
             checkEndGame();
@@ -568,8 +585,6 @@
             });
             if (emptyCells.length > 0) {
                 currentTarget = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-                targetNumberEl.classList.add('scale-125', 'text-red-500');
-                setTimeout(() => targetNumberEl.classList.remove('scale-125', 'text-red-500'), 300);
             }
         }
 
